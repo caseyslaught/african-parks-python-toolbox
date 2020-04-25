@@ -1,0 +1,8 @@
+
+How to add the Python Toolbox to ArcGIS:
+- Right-click Toolboxes and select Add Toolbox.
+- If Toolbox code is updated, run python setup.py to rebuidl the .pyt file.
+    + Then refresh the Toolbox in ArcGIS.
+
+How to remove tracked files from Git cache
+git rm -r --cached .

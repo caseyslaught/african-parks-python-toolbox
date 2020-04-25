@@ -1,0 +1,8 @@
+
+# output
+*.pyt
+*.pyt.xml
+
+# environment
+venv/
+.idea/
