@@ -4,8 +4,8 @@ from datetime import datetime, timedelta
 
 class FetchPositions(object):
     def __init__(self):
-        self.label = "Fetch Positions"
-        self.description = "Fetches positions from EarthRanger."
+        self.label = "Get Positions"
+        self.description = "Gets positions from EarthRanger."
         self.canRunInBackground = False  # maybe True?
         self.maxDayRange = 30
 

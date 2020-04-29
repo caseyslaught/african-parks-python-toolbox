@@ -8,9 +8,10 @@ sys.dont_write_bytecode = True
 
 class Toolbox(object):
     def __init__(self):
-        self.label = "Garamba Python Toolbox"
-        self.alias = "Garamba Python Toolbox"
-        self.tools = [FetchPositions]
+        self.label = "African Parks Python Toolbox"
+        self.alias = "African Parks Python Toolbox"
+        self.tools = [GetPositions]
 
 
-FetchPositions = object
+# Tool names
+GetPositions = object
