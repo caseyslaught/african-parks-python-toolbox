@@ -6,7 +6,7 @@ import re
 # that's why we need to use a single .pyt file
 # this is used to create the .pyt, transfering all tools to single .pyt file...
 
-pyt_path = os.path.join('output', 'Garamba Python Toolbox.pyt')
+pyt_path = os.path.join('output', 'African Parks Python Toolbox.pyt')
 tools_dir = os.path.join('src', 'tools')
 
 # get toolbox code

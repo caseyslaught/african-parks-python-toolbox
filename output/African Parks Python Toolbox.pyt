@@ -1,7 +1,7 @@
 import arcpy
-import os
-from datetime import datetime, timedelta
 import sys
+from datetime import datetime, timedelta
+import os
 
 # prevent writing .pyc files
 sys.dont_write_bytecode = True
@@ -16,25 +16,47 @@ class Toolbox(object):
 
 class FetchPositions(object):
     def __init__(self):
-        self.label = "Fetch Positions!"
+        self.label = "Fetch Positions"
         self.description = "Fetches positions from a number of EarthRanger data sources."
         self.canRunInBackground = False
         self.maxDayRange = 30
 
     def getParameterInfo(self):
 
+        park = arcpy.Parameter(
+            displayName="Park",
+            name="park",
+            datatype="GPString",
+            parameterType="Required",
+            direction="Input")
+        park.filter.type = "ValueList"
+        park.filter.list = ['Akagera', 'Garamba']
+
         source = arcpy.Parameter(
-            displayName="Source",
+            displayName="Data source",
             name="source",
             datatype="GPString",
             parameterType="Required",
             direction="Input")
         source.filter.type = "ValueList"
-        source.filter.list = ['Elephants', 'Delormes']
-        source.value = "Elephants"
+        source.filter.list = []
+
+        username = arcpy.Parameter(
+            displayName="EarthRanger username",
+            name="username",
+            datatype="GPString",
+            parameterType="Required",
+            direction="Input")
+
+        password = arcpy.Parameter(
+            displayName="EarthRanger password",
+            name="password",
+            datatype="GPString",
+            parameterType="Required",
+            direction="Input")
 
         start_date = arcpy.Parameter(
-            displayName="Start Date",
+            displayName="Start date",
             name="start_date",
             datatype="GPDate",
             parameterType="Required",
@@ -43,7 +65,7 @@ class FetchPositions(object):
         start_date.value = start.strftime('%Y-%m-%d %H:%M:%S %p')
 
         end_date = arcpy.Parameter(
-            displayName="End Date",
+            displayName="End date",
             name="end_date",
             datatype="GPDate",
             parameterType="Required",
@@ -52,17 +74,30 @@ class FetchPositions(object):
         end_date.value = end.strftime('%Y-%m-%d %H:%M:%S %p')
 
         return [
+            park,
             source,
+            username,
+            password,
             start_date,
             end_date,
         ]
 
     def updateParameters(self, parameters):
-        pass
+        park, source, username, password, start_date, end_date = self._unpack_parameters(parameters)
+
+        if park.valueAsText == 'Akagera':
+            source.enabled = True
+            source.filter.list = ['Elephants', 'Rhinos']
+        elif park.valueAsText == 'Garamba':
+            source.enabled = True
+            source.filter.list = ['Elephants', 'Giraffes', 'Patrols']
+        else:
+            source.enabled = False
+            source.value = None
 
     def updateMessages(self, parameters):
 
-        source, start_date, end_date = parameters[0], parameters[1], parameters[2]
+        park, source, username, password, start_date, end_date = self._unpack_parameters(parameters)
 
         # make sure start is before end and difference does not exceed max_day_range
         if start_date.value and end_date.value:
@@ -81,12 +116,10 @@ class FetchPositions(object):
 
     def execute(self, parameters, messages):
 
-        source, start_date, end_date = (
-            parameters[0].valueAsText,
-            parameters[1].value,
-            parameters[2].value,
-        )
+        park, source, username, password, start_date, end_date = self._unpack_parameters(parameters)
 
+        messages.addMessage(f'username = {username}')
+        messages.addMessage(f'password = {password[:3]}{"*"*len(password[3:])}')
         messages.addMessage(f'source = {source}')
         messages.addMessage(f'start_date = {start_date}')
         messages.addMessage(f'end_date = {end_date}')
@@ -100,16 +133,13 @@ class FetchPositions(object):
 
         messages.addMessage('All done. Goodbye!')
 
-
     def _create_feature_class(self, source: str):
-
         fc = arcpy.CreateFeatureclass_management(
             out_path=arcpy.env.workspace,
             out_name=f'{source}_Positions_Feature_Class',
             geometry_type='Point',
             spatial_reference=4326
         )[0]
-
         arcpy.AddField_management(fc, "DatetimeRecorded", "DATE")
         return fc
 
@@ -118,3 +148,13 @@ class FetchPositions(object):
             in_features=feature_class,
             out_layer=f'{source} Positions Feature Layer'
         )[0]
+
+    def _unpack_parameters(self, parameters):
+        return (
+            parameters[0],
+            parameters[1],
+            parameters[2],
+            parameters[3],
+            parameters[4],
+            parameters[5],
+        )
